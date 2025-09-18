@@ -92,6 +92,74 @@ def page_eda(df):
                        color_discrete_sequence=["#4f008c"])
     st.plotly_chart(fig, use_container_width=True)
 
+#--------------------------------Page 2 - Insights---------------------------
+
+def page_insights(df):
+    st.title("📈 Insights")
+
+    # Choose data source
+    mode = st.radio("Select Data Source", ["DataFrame (Python)", "Database (SQL)"], horizontal=True)
+
+    # Filter by Department
+    depts = sorted(df["Department"].dropna().unique().tolist())
+    chosen = st.multiselect("Filter by Department", depts, default=depts)
+
+    if mode == "DataFrame (Python)":
+        # PANDAS MODE 
+        df_f = df[df["Department"].isin(chosen)]
+
+        # KPIs
+        k1, k2, k3, k4 = st.columns(4)
+        with k1: st.metric("Total Employees", f"{df_f['EmployeeCount'].sum():,}")
+        with k2: st.metric("Attrition Rate", f"{df_f['Attrition'].eq('Yes').mean()*100:.1f}%")
+        with k3: st.metric("Avg Perf. Rating", f"{df_f['PerformanceRating'].mean():.2f}")
+        with k4: st.metric("Avg Monthly Income", f"${df_f['MonthlyIncome'].mean():,.0f}")
+
+        st.markdown("---")
+
+        # 1) Employees per Department
+        st.subheader("Employees per Department")
+        dept_cnt = df_f.groupby("Department")["EmployeeCount"].sum().reset_index()
+        fig_dept = px.bar(dept_cnt.sort_values("EmployeeCount"),
+                          x="EmployeeCount", y="Department", orientation="h",
+                          text="EmployeeCount", color="EmployeeCount",
+                          color_continuous_scale=["#4f008c", "#ff375e"],
+                          template="plotly_white")
+        st.plotly_chart(fig_dept, use_container_width=True)
+
+        # 2) Average Monthly Income by Job Role
+        st.subheader("Average Monthly Income by Job Role")
+        inc_role = df_f.groupby("JobRole")["MonthlyIncome"].mean().reset_index().round(0)
+        fig_inc = px.bar(inc_role.sort_values("MonthlyIncome"),
+                         x="MonthlyIncome", y="JobRole", orientation="h",
+                         text="MonthlyIncome", color="MonthlyIncome",
+                         color_continuous_scale=["#4f008c", "#ff375e"],
+                         template="plotly_white")
+        st.plotly_chart(fig_inc, use_container_width=True)
+
+        # 3) Average Performance by Department 
+        st.subheader("Average Performance by Department")
+        perf = df_f.groupby("Department")["PerformanceRating"].mean().reset_index(name="AvgRating")
+        fig_perf = px.pie(perf, names="Department", values="AvgRating",
+                          color_discrete_sequence=["#4f008c", "#ff375e", "#3f2156"],
+                          hole=0.35)
+        st.plotly_chart(fig_perf, use_container_width=True)
+
+        # 4) Overtime vs Attrition by Department
+        st.subheader("Attrition vs Overtime by Department")
+        ot = (df_f.groupby(["Department", "OverTime"])
+                  .agg(AttritionRate=("Attrition", lambda s: (s=="Yes").mean()))
+                  .reset_index())
+        fig_ot = px.bar(ot, x="OverTime", y="AttritionRate",
+                        facet_col="Department", facet_col_wrap=3,
+                        text=ot["AttritionRate"].mul(100).round(1).astype(str)+"%",
+                        color="OverTime", color_discrete_sequence=["#4f008c", "#ff375e"],
+                        template="plotly_white")
+        fig_ot.update_layout(yaxis_tickformat=".0%")
+        st.plotly_chart(fig_ot, use_container_width=True)
+        
+
+
 #---------------------------------- Main----------------------------------------
 st.sidebar.image("top_banner.png", use_container_width=True)  
 st.sidebar.title("IBM Hr Data Analysis")
@@ -104,3 +172,5 @@ df = load_data()
 
 if page == "EDA":
     page_eda(df)
+elif page == "Insights":
+    page_insights(df)
