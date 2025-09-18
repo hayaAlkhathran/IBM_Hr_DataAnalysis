@@ -36,18 +36,6 @@ def load_data():
     conn.close()
     return df
 
-def run_query(query, params=()):
-    """
-    Executes a SQL query with optional parameters.
-    run_query function : Input (query-SQL query , params- tuple of parameters) , Output (nune)
-    We need this function to avoid repeating the same steps of connecting to the database,
-    executing the query, committing changes, and closing the connection every time we want to run a query.
-    """ 
-    conn = sqlite3.connect(DB_PATH)
-    cur = conn.cursor()
-    cur.execute(query, params)
-    conn.commit()
-    conn.close()
 
 #-------------------------------Page 1 - EDA-----------------------------
 
@@ -268,6 +256,52 @@ def page_insights(df):
                         template="plotly_white")
         fig_ot.update_layout(yaxis_tickformat=".0%")
         st.plotly_chart(fig_ot, use_container_width=True)
+
+        
+        # 5) Top 5 Employees by Performance
+        st.subheader("Top 5 Employees by Performance Rating (SQL)")
+        top5_sql = pd.read_sql("""
+            SELECT EmployeeNumber, MAX(PerformanceRating) AS MaxRating
+            FROM employees
+            GROUP BY EmployeeNumber
+            ORDER BY MaxRating DESC, EmployeeNumber ASC
+            LIMIT 5
+        """, conn)
+        st.dataframe(top5_sql, width="stretch")
+
+        # 6) Monthly Income by Education
+        st.subheader("Average Monthly Income by Education (SQL)")
+        edu_sql = pd.read_sql("""
+            SELECT Education, AVG(MonthlyIncome) AS AvgMonthlyIncome
+            FROM employees
+            GROUP BY Education
+            ORDER BY Education DESC
+        """, conn)
+        edu_map = {1:"Below College",2:"College",3:"Bachelor",4:"Master",5:"Doctor"}
+        edu_sql["EducationLabel"] = edu_sql["Education"].map(edu_map)
+        fig_edu = px.bar(edu_sql, x="EducationLabel", y="AvgMonthlyIncome",
+                         text="AvgMonthlyIncome", color="EducationLabel",
+                         color_discrete_sequence=["#ff375e", "#4f008c"],
+                         template="plotly_white")
+        st.plotly_chart(fig_edu, use_container_width=True)
+
+        # 7) Attrition by Work-Life Balance
+        st.subheader("Attrition by Work-Life Balance (SQL)")
+        wlb_sql = pd.read_sql("""
+            SELECT WorkLifeBalance,
+                   SUM(CASE WHEN Attrition='Yes' THEN 1 ELSE 0 END)*1.0/COUNT(*) AS AttritionRate
+            FROM employees
+            GROUP BY WorkLifeBalance
+        """, conn)
+        fig_wlb = px.bar(wlb_sql, x="WorkLifeBalance", y="AttritionRate",
+                         text=wlb_sql["AttritionRate"].mul(100).round(1).astype(str)+"%",
+                         color="AttritionRate", color_continuous_scale=["#4f008c", "#ff375e"],
+                         template="plotly_white")
+        fig_wlb.update_layout(xaxis_title="Work-Life Balance (1=Bad, 4=Best)",
+                              yaxis_title="Attrition Rate", yaxis_tickformat=".0%")
+        st.plotly_chart(fig_wlb, use_container_width=True)
+
+        conn.close()
 
 #---------------------------------- Main----------------------------------------
 st.sidebar.image("top_banner.png", use_container_width=True)  
