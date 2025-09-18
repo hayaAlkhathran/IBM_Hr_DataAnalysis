@@ -357,6 +357,18 @@ def page_manage():
                       (new_income, new_dept, new_role, new_edu, new_wlb, new_ot, emp_num))
             st.success(f"Employee {emp_num} updated!")
 
+    st.markdown("---")
+    
+    # Delete Employee
+    st.subheader("🗑️ Delete Employee ")
+    with st.form("delete_form"):
+        emp_num_del = st.number_input("Employee Number to Delete", min_value=1, step=1)
+        delete = st.form_submit_button("Delete Employee")
+        if delete:
+            run_query("DELETE FROM employees WHERE EmployeeNumber=?", (emp_num_del,))
+            st.success(f"Employee #{emp_num_del} deleted from database!")
+
+
 #---------------------------------- Main----------------------------------------
 st.sidebar.image("top_banner.png", use_container_width=True)  
 st.sidebar.title("IBM Hr Data Analysis")
