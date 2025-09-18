@@ -36,6 +36,18 @@ def load_data():
     conn.close()
     return df
 
+def run_query(query, params=()):
+    """
+    Executes a SQL query with optional parameters.
+    run_query function : Input (query-SQL query , params- tuple of parameters) , Output (nune)
+    We need this function to avoid repeating the same steps of connecting to the database,
+    executing the query, committing changes, and closing the connection every time we want to run a query.
+    """ 
+    conn = sqlite3.connect(DB_PATH)
+    cur = conn.cursor()
+    cur.execute(query, params)
+    conn.commit()
+    conn.close()
 
 #-------------------------------Page 1 - EDA-----------------------------
 
@@ -222,6 +234,40 @@ def page_insights(df):
         fig_dept.update_traces(textposition="outside")
         st.plotly_chart(fig_dept, use_container_width=True)
 
+        # 2) Average Monthly Income by Job Role
+        st.subheader("Average Monthly Income by Job Role (SQL)")
+        inc_sql = pd.read_sql("SELECT JobRole, AVG(MonthlyIncome) AS AvgMonthlyIncome FROM employees GROUP BY JobRole", conn)
+        fig_inc = px.bar(inc_sql.sort_values("AvgMonthlyIncome"),
+                         x="AvgMonthlyIncome", y="JobRole", orientation="h",
+                         text="AvgMonthlyIncome", color="AvgMonthlyIncome",
+                         color_continuous_scale=["#4f008c", "#ff375e"],
+                         template="plotly_white")
+        st.plotly_chart(fig_inc, use_container_width=True)
+
+        # 3) Average Performance by Department 
+        st.subheader("Average Performance by Department (SQL)")
+        perf_sql = pd.read_sql("SELECT Department, AVG(PerformanceRating) AS AvgRating FROM employees GROUP BY Department", conn)
+        fig_perf = px.pie(perf_sql, names="Department", values="AvgRating",
+                          color_discrete_sequence=["#4f008c", "#ff375e", "#3f2156"],
+                          hole=0.35)
+        st.plotly_chart(fig_perf, use_container_width=True)
+
+        
+         # 4) Overtime vs Attrition by Department
+        st.subheader("Attrition vs Overtime by Department (SQL)")
+        ot_sql = pd.read_sql("""
+            SELECT Department, OverTime,
+                   SUM(CASE WHEN Attrition='Yes' THEN 1 ELSE 0 END)*1.0/COUNT(*) AS AttritionRate
+            FROM employees
+            GROUP BY Department, OverTime
+        """, conn)
+        fig_ot = px.bar(ot_sql, x="OverTime", y="AttritionRate",
+                        facet_col="Department", facet_col_wrap=3,
+                        text=ot_sql["AttritionRate"].mul(100).round(1).astype(str)+"%",
+                        color="OverTime", color_discrete_sequence=["#4f008c", "#ff375e"],
+                        template="plotly_white")
+        fig_ot.update_layout(yaxis_tickformat=".0%")
+        st.plotly_chart(fig_ot, use_container_width=True)
 
 #---------------------------------- Main----------------------------------------
 st.sidebar.image("top_banner.png", use_container_width=True)  
