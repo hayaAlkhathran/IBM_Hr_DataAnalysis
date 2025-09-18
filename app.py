@@ -339,6 +339,24 @@ def page_manage():
 
     st.markdown("---")
 
+    # Update employee
+    st.subheader("Update Employee ")
+    with st.form("update_form"):
+        emp_num = st.text_input("Employee Number to Update")
+        new_income = st.number_input("New Monthly Income", min_value=0)
+        new_dept = st.text_input("New Department")
+        new_role = st.text_input("New Job Role")
+        new_edu = st.selectbox("New Education", [1,2,3,4,5])
+        new_wlb = st.selectbox("New Work-Life Balance", [1,2,3,4])
+        new_ot = st.selectbox("New Overtime", ["Yes","No"])
+        submitted = st.form_submit_button("Update Employee")
+        if submitted:
+            run_query("""UPDATE employees
+                         SET MonthlyIncome=?, Department=?, JobRole=?, Education=?, WorkLifeBalance=?, OverTime=?
+                         WHERE EmployeeNumber=?""",
+                      (new_income, new_dept, new_role, new_edu, new_wlb, new_ot, emp_num))
+            st.success(f"Employee {emp_num} updated!")
+
 #---------------------------------- Main----------------------------------------
 st.sidebar.image("top_banner.png", use_container_width=True)  
 st.sidebar.title("IBM Hr Data Analysis")
