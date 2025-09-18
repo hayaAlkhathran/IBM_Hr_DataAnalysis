@@ -36,6 +36,19 @@ def load_data():
     conn.close()
     return df
 
+def run_query(query, params=()):
+    """
+    Executes a SQL query with optional parameters.
+    run_query function : Input (query-SQL query , params- tuple of parameters) , Output (nune)
+    We need this function to avoid repeating the same steps of connecting to the database,
+    executing the query, committing changes, and closing the connection every time we want to run a query.
+    """ 
+    conn = sqlite3.connect(DB_PATH)
+    cur = conn.cursor()
+    cur.execute(query, params)
+    conn.commit()
+    conn.close()
+
 
 #-------------------------------Page 1 - EDA-----------------------------
 
@@ -303,6 +316,29 @@ def page_insights(df):
 
         conn.close()
 
+
+#--------------------------------- Page 3 - Manage Employees-------------------------
+
+def page_manage():
+    st.title("👥 Manage Employees")
+
+    # Add new employee
+    st.subheader("Add New Employee")
+    with st.form("add_form"):
+        emp_num = st.text_input("Employee Number")
+        dept = st.text_input("Department")
+        role = st.text_input("Job Role")
+        income = st.number_input("Monthly Income", min_value=0)
+        edu = st.selectbox("Education", [1,2,3,4,5])
+        wlb = st.selectbox("Work-Life Balance", [1,2,3,4])
+        submitted = st.form_submit_button("Add Employee")
+        if submitted:
+            run_query("INSERT INTO employees (EmployeeNumber, Department, JobRole, MonthlyIncome, Education, WorkLifeBalance, EmployeeCount) VALUES (?, ?, ?, ?, ?, ?, 1)",
+                      (emp_num, dept, role, income, edu, wlb))
+            st.success(f"Employee {emp_num} added!")
+
+    st.markdown("---")
+
 #---------------------------------- Main----------------------------------------
 st.sidebar.image("top_banner.png", use_container_width=True)  
 st.sidebar.title("IBM Hr Data Analysis")
@@ -317,3 +353,5 @@ if page == "EDA":
     page_eda(df)
 elif page == "Insights":
     page_insights(df)
+elif page == "Manage Employees":
+    page_manage()   
