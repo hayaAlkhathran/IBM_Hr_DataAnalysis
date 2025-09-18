@@ -157,6 +157,41 @@ def page_insights(df):
                         template="plotly_white")
         fig_ot.update_layout(yaxis_tickformat=".0%")
         st.plotly_chart(fig_ot, use_container_width=True)
+
+        
+        # 5) Top 5 Employees by Performance
+        st.subheader("Top 5 Employees by Performance Rating")
+        top5 = (df.groupby("EmployeeNumber")["PerformanceRating"]
+                  .max().reset_index(name="MaxRating")
+                  .sort_values(["MaxRating", "EmployeeNumber"], ascending=[False, True])
+                  .head(5))
+        st.dataframe(top5, use_container_width=True)
+
+        # 6) Average Monthly Income by Education
+        st.subheader("Average Monthly Income by Education")
+        edu_map = {1:"Below College",2:"College",3:"Bachelor",4:"Master",5:"Doctor"}
+        edu_inc = (df.groupby("Education")["MonthlyIncome"].mean()
+                     .reset_index(name="AvgMonthlyIncome")
+                     .sort_values("Education", ascending=False))
+        edu_inc["EducationLabel"] = edu_inc["Education"].map(edu_map)
+        fig_edu = px.bar(edu_inc, x="EducationLabel", y="AvgMonthlyIncome",
+                         text="AvgMonthlyIncome", color="EducationLabel",
+                         color_discrete_sequence=["#ff375e", "#4f008c"],
+                         template="plotly_white")
+        st.plotly_chart(fig_edu, use_container_width=True)
+
+        # 7) Attrition Rate by Work-Life Balance
+        st.subheader("Attrition Rate by Work-Life Balance")
+        wlb_attr = (df.groupby("WorkLifeBalance")["Attrition"]
+                      .apply(lambda x:(x=="Yes").mean())
+                      .reset_index(name="AttritionRate"))
+        fig_wlb = px.bar(wlb_attr, x="WorkLifeBalance", y="AttritionRate",
+                         text=wlb_attr["AttritionRate"].mul(100).round(1).astype(str)+"%",
+                         color="AttritionRate", color_continuous_scale=["#4f008c", "#ff375e"],
+                         template="plotly_white")
+        fig_wlb.update_layout(xaxis_title="Work-Life Balance (1=Bad, 4=Best)",
+                              yaxis_title="Attrition Rate", yaxis_tickformat=".0%")
+        st.plotly_chart(fig_wlb, use_container_width=True)
         
 
 
