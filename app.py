@@ -192,7 +192,35 @@ def page_insights(df):
         fig_wlb.update_layout(xaxis_title="Work-Life Balance (1=Bad, 4=Best)",
                               yaxis_title="Attrition Rate", yaxis_tickformat=".0%")
         st.plotly_chart(fig_wlb, use_container_width=True)
-        
+    else:
+        # SQL MODE 
+        st.info("Running Insights using SQL queries from employees.db")
+        conn = sqlite3.connect("employees.db")
+
+        # KPIs
+        total_sql = pd.read_sql("SELECT SUM(EmployeeCount) AS Total FROM employees", conn)
+        attr_sql  = pd.read_sql("SELECT AVG(CASE WHEN Attrition='Yes' THEN 1 ELSE 0 END)*100 AS AttritionRate FROM employees", conn)
+        perf_sql  = pd.read_sql("SELECT AVG(PerformanceRating) AS AvgPerf FROM employees", conn)
+        inc_sql   = pd.read_sql("SELECT AVG(MonthlyIncome) AS AvgIncome FROM employees", conn)
+
+        k1, k2, k3, k4 = st.columns(4)
+        with k1: st.metric("Total Employees", f"{int(total_sql['Total'][0]):,}")
+        with k2: st.metric("Attrition Rate", f"{attr_sql['AttritionRate'][0]:.1f}%")
+        with k3: st.metric("Avg Perf. Rating", f"{perf_sql['AvgPerf'][0]:.2f}")
+        with k4: st.metric("Avg Monthly Income", f"${inc_sql['AvgIncome'][0]:,.0f}")
+
+        st.markdown("---")
+
+        # 1) Employees per Department
+        st.subheader("Employees per Department (SQL)")
+        dept_sql = pd.read_sql("SELECT Department, SUM(EmployeeCount) AS EmpCount FROM employees GROUP BY Department", conn)
+        fig_dept = px.bar(dept_sql.sort_values("EmpCount"),
+                          x="EmpCount", y="Department", orientation="h",
+                          text="EmpCount", color="EmpCount",
+                          color_continuous_scale=["#4f008c", "#ff375e"],
+                          template="plotly_white")
+        fig_dept.update_traces(textposition="outside")
+        st.plotly_chart(fig_dept, use_container_width=True)
 
 
 #---------------------------------- Main----------------------------------------
