@@ -1,4 +1,5 @@
 # 📊 IBM HR Employee Dashboard
+An interactive HR analytics dashboard that helps organizations uncover attrition trends, explore workforce insights, and make data-driven retention decisions.
 
 ![Python](https://img.shields.io/badge/Python-3.10-blue?logo=python)  
 ![Streamlit](https://img.shields.io/badge/Streamlit-1.37-red?logo=streamlit)  
@@ -92,27 +93,33 @@ https://www.kaggle.com/datasets/pavansubhasht/ibm-hr-analytics-attrition-dataset
 
 ## 📂 Project Structure
 
+```bash
 HR Project/
 │── app.py                       # Main Streamlit app
-│── requirements.txt             # Dependencies 
-│── environment.yml              # Dependencies Conda
-│── README.md                    # Documentation
+│── requirements.txt              # Pip dependencies
+│── environment.yml               # Conda dependencies
+│── README.md                     # Documentation
+│── LICENSE                       # License file
+│── .gitignore                    # Ignore unnecessary files
 │
-├── Data/                        # All data files
+├── Data/                         # All data files
 │   ├── employees.db
-│   ├── WA_Fn-UseC_-HR-Employee-Attrition.csv
+│   └── WA_Fn-UseC_-HR-Employee-Attrition.csv
 │
-├── Notebooks/                   # Jupyter notebooks
+├── Notebooks/                    # Jupyter notebooks
 │   └── IBM_HrData_Notebook.ipynb
 │
-├── Images/                      # Screenshots & logos
-│   ├── top_banner.png
-│   ├── bottom_banner.png
-│   ├── Screenshot_2025-09-18_172604.png
-│   ├── Screenshot_2025-09-18_172634.png
-│   ├── Screenshot_2025-09-18_172709.png
-│   ├── Screenshot_2025-09-18_172721.png
-│
+└── Images/                       # Screenshots & logos
+    ├── top_banner.png
+    ├── bottom_banner.png
+    ├── Screenshot_2025-09-18_172604.png
+    ├── Screenshot_2025-09-18_172634.png
+    ├── Screenshot_2025-09-18_172709.png
+    ├── Screenshot_2025-09-18_172721.png
+    ├── Dashboard_Demo_Filter.gif
+    └── Dashboard_Demo_Add_Employee.gif
+
+```
 
 ---
 

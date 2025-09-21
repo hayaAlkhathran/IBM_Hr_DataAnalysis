@@ -259,22 +259,31 @@ def page_insights(df):
         st.plotly_chart(fig_perf, use_container_width=True)
 
         
-         # 4) Overtime vs Attrition by Department
+         # 4) Overtime vs Attrition by Department        
         st.subheader("Attrition vs Overtime by Department (SQL)")
         ot_sql = pd.read_sql("""
-            SELECT Department, OverTime,
-                   SUM(CASE WHEN Attrition='Yes' THEN 1 ELSE 0 END)*1.0/COUNT(*) AS AttritionRate
+           WITH DeptOvertime AS (
+                SELECT Department,
+                OverTime,
+                CASE WHEN Attrition = 'Yes' THEN 1 ELSE 0 END AS is_attrited
             FROM employees
-            GROUP BY Department, OverTime
-        """, conn)
-        fig_ot = px.bar(ot_sql, x="OverTime", y="AttritionRate",
-                        facet_col="Department", facet_col_wrap=3,
-                        text=ot_sql["AttritionRate"].mul(100).round(1).astype(str)+"%",
-                        color="OverTime", color_discrete_sequence=["#4f008c", "#ff375e"],
-                        template="plotly_white")
+             )
+            SELECT Department,OverTime,AVG(is_attrited)*100 AS AttritionRate
+            FROM DeptOvertime
+            GROUP BY Department, OverTime;
+            """, conn)
+        fig_ot = px.bar(
+        ot_sql,
+        x="OverTime",
+        y="AttritionRate",
+        facet_col="Department",
+        facet_col_wrap=3,
+        text=ot_sql["AttritionRate"].round(1).astype(str) + "%",
+        color="OverTime",
+        color_discrete_sequence=["#4f008c", "#ff375e"],
+         template="plotly_white")
         fig_ot.update_layout(yaxis_tickformat=".0%")
         st.plotly_chart(fig_ot, use_container_width=True)
-
         
         # 5) Top 5 Employees by Performance
         st.subheader("Top 5 Employees by Performance Rating (SQL)")
