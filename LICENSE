@@ -1,0 +1,13 @@
+License
+
+Copyright (c) 2025 Haya Abdulaziz Alkhthran
+
+Permission is granted, free of charge, to use, copy, modify, and distribute this software, provided that such use is for lawful, ethical, and non-harmful purposes.
+
+Any use of this software for purposes that are malicious, unethical, discriminatory, exploitative, or harmful to individuals or communities is strictly prohibited.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY CLAIM, DAMAGES, OR OTHER LIABILITY ARISING FROM THE USE OF THIS SOFTWARE.
+
+This project uses the IBM HR Analytics Attrition Dataset, available on Kaggle:
+https://www.kaggle.com/datasets/pavansubhasht/ibm-hr-analytics-attrition-dataset
+The dataset is provided by IBM and Kaggle under their respective terms of use.
