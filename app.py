@@ -5,8 +5,13 @@ import sqlite3
 import os
 
 
-CSV_PATH = r"C:\Users\halkhthran.t\Downloads\WA_Fn-UseC_-HR-Employee-Attrition.csv"
-DB_PATH = "employees.db"
+CSV_PATH = "Data/WA_Fn-UseC_-HR-Employee-Attrition.csv"
+DB_PATH = "Data/employees.db"
+
+import os
+
+print("CSV exists:", os.path.exists(CSV_PATH))
+print("DB exists:", os.path.exists(DB_PATH))
 
 # If the SQLite database file does not exist, create it from the CSV file
 if not os.path.exists(DB_PATH):
@@ -208,7 +213,7 @@ def page_insights(df):
     else:
         # SQL MODE 
         st.info("Running Insights using SQL queries from employees.db")
-        conn = sqlite3.connect("employees.db")
+        conn = sqlite3.connect("Data/employees.db")
 
         # KPIs
         total_sql = pd.read_sql("SELECT SUM(EmployeeCount) AS Total FROM employees", conn)
@@ -358,7 +363,7 @@ def page_manage():
             st.success(f"Employee {emp_num} updated!")
 
     st.markdown("---")
-    
+
     # Delete Employee
     st.subheader("🗑️ Delete Employee ")
     with st.form("delete_form"):
@@ -370,10 +375,10 @@ def page_manage():
 
 
 #---------------------------------- Main----------------------------------------
-st.sidebar.image("top_banner.png", use_container_width=True)  
+st.sidebar.image("Images/top_banner.png", use_container_width=True)  
 st.sidebar.title("IBM Hr Data Analysis")
 page = st.sidebar.radio("Go to", ["EDA", "Insights", "Manage Employees"])
-st.sidebar.image("bottom_banner.png", use_container_width =True) 
+st.sidebar.image("Images/bottom_banner.png", use_container_width =True) 
 
 
 #Calling all the function 
